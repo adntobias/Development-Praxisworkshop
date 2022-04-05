@@ -45,6 +45,14 @@ az functionapp create -g $RGName --consumption-plan-location $Location --os-type
 FunctionKey=$(az functionapp keys list -g $RGName -n $FunctionName -o tsv --query "functionKeys")
 FunctionUri="https://"$(az functionapp config hostname list --resource-group $RGName --webapp-name $FunctionName --query [0].name -o tsv)"/api/"
 
+#Migrate v3 to v4
+#az functionapp config appsettings set --settings FUNCTIONS_EXTENSION_VERSION=~4 -n $FunctionName -g $RGName
+
+#Assign User-Assigned Managed Identity to Azure Function
+#userAssignedIdentityResourceId=$(az identity show -g $RGName -n <USER_IDENT_NAME> --query id -o tsv)
+#appResourceId=$(az webapp show -g $RGName -n $FunctionName --query id -o tsv)
+#az rest --method PATCH --uri "${appResourceId}?api-version=2021-01-01" --body "{'properties':{'keyVaultReferenceIdentity':'${userAssignedIdentityResourceId}'}}"
+
 #Function Deploy
 #dotnet clean
 #dotnet build
