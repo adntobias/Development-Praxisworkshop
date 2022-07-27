@@ -34,11 +34,11 @@ namespace Development_Praxisworkshop.Pages
     }
     public async Task<IActionResult> OnGetAsync()
     {
-
       todos = todo.GetToDos();
 
       return Page();
     }
+
 
     public async Task<IActionResult> OnPostInsertAsync(string todoTask)
     {
