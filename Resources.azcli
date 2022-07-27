@@ -14,6 +14,7 @@ KeyVaultName="wrkshpkeyvault"$Suffix
 SecretName="StorageConnectionString"
 AppInsightsName="wrkshpmonitoring"$Suffix
 WorkspaceName="wrkshpmonitoringworspace"$Suffix
+ADAppName="DevWorkshpReg"$Suffix
 #--------------------------------------------
 #RegistryName="myacr"$Suffix
 #ImageTag="frontend:v1"
@@ -71,12 +72,12 @@ KVSecretUri="https://"$KeyVaultName".vault.azure.net/secrets/"$SecretName
 KVUri="https://"$KeyVaultName".vault.azure.net/"
 
 #AppRegistration
-az ad app create --display-name DevWorkshopApp
-OwnerId=$(az ad signed-in-user show -o tsv --query "objectId")
-AppId=$(az ad app list -o tsv --query [0].objectId)
+az ad app create --display-name $ADAppName
+OwnerId=$(az ad signed-in-user show -o tsv --query "id")
+AppId=$(az ad app list --display-name $ADAppName -o tsv --query [0].id)
 az ad app owner add --id $AppId --owner-object-id $OwnerId
-az ad app update --id $AppId --reply-urls "https://"$FrontendUri"/signin-oidc"
-az ad app update --id $AppId --set logoutUrl="https://"$FrontendUri"/signout-oidc"
+az ad app update --id $AppId --web-redirect-uris "https://"$FrontendUri"/signin-oidc"
+#az ad app update --id $AppId --set logoutUrl="https://"$FrontendUri"/signout-oidc"
 Secret=$(az ad app credential reset --id $AppId -o tsv --query password)
 ClientId=$(az ad app show --id $AppId -o tsv --query appId)
 TenantId=$(az account show -o tsv --query tenantId)
@@ -100,11 +101,11 @@ az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentica
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientId=$ClientId
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__TenantId=$TenantId
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientSecret=$Secret
-az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientCapabilities=[ "cp1" ]
+az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientCapabilities="[ \"cp1\" ]"
 az webapp config appsettings set -g $RGName -n $WebAppName --settings DownstreamApi__Scopes=user.read
 az webapp config appsettings set -g $RGName -n $WebAppName --settings DownstreamApi__BaseUrl=https://graph.microsoft.com/v1.0
-#az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__VaultUri=$KVUri
-#az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__StorageAccountCredentials=$KVSecretUri
+az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__VaultUri=$KVUri
+az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__StorageAccountCredentials=$KVSecretUri
 
 #Set Function AppSettings
 az functionapp config appsettings set -n $FunctionName -g $RGName --settings "STORAGE_NAME=$DataStorename"
