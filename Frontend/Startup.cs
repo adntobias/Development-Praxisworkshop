@@ -30,12 +30,19 @@ namespace Development_Praxisworkshop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string[] initialScopes = Configuration.GetValue<string>("DownstreamApi:Scopes")?.Split(' ');
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(Configuration.GetSection("Authentication")); // Fetch Auth Data from appsettings.json
-            
+                .AddMicrosoftIdentityWebApp(Configuration.GetSection("Authentication")) // Fetch Auth Data from appsettings.json
+                .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+                .AddMicrosoftGraph(Configuration.GetSection("DownstreamApi"))
+                .AddInMemoryTokenCaches();
+
             // Role Based Claims
-            services.AddAuthorization(options => {
+            services.AddAuthorization(options =>
+            {
                 options.AddPolicy("ClaimsTest", policy => policy.RequireClaim("Contacts.Read"));
+                options.AddPolicy("MustHaveOneDrive", policy => policy.RequireClaim("Files.ReadWrite"));
+                //options.AddPolicy("Roles", policy => policy.RequireClaim("Roles"));
             });
 
             // Enable Authentication globally
@@ -50,9 +57,13 @@ namespace Development_Praxisworkshop
             services.AddRazorPages()
                 .AddMicrosoftIdentityUI();
 
-            // Include Application Insights with config from appsettings.json
-            services.AddApplicationInsightsTelemetry(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey"));
+            // Add the UI support to handle claims challenges
+            services.AddServerSideBlazor()
+               .AddMicrosoftIdentityConsentHandler();
 
+            // Include Application Insights with config from appsettings.json
+            // https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#using-applicationinsightsserviceoptions
+            services.AddApplicationInsightsTelemetry(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey"));
             // Configure SignOut redirect (doesn't work though...)
             services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
@@ -81,7 +92,7 @@ namespace Development_Praxisworkshop
             app.UseStaticFiles();
 
             app.UseRouting();
-            
+
             app.UseAuthentication(); // Use Authentication
             app.UseAuthorization();
 

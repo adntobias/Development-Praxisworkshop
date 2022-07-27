@@ -1,0 +1,23 @@
+@page
+@model OneDriveFilesModel
+@using System.Security.Claims
+@using Microsoft.Graph;
+
+@{
+    ViewData["Title"] = "OneDrive"; 
+}
+<link rel="stylesheet" href="~/css/gallery.css" />
+<h1>@ViewData["Title"]</h1>
+
+
+<h2>OneDrive files</h2>
+
+@foreach (DriveItem file in @Model._files)
+{
+    <div class="responsive">
+        <div class="gallery">
+            <div class="desc">@file.Name</div>
+        </div>
+    </div>
+}
+<div class="clearfix"></div>

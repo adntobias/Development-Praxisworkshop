@@ -1,12 +1,16 @@
 ﻿@page
 @model IndexModel
+@using System.Security.Claims
+
 @{
     ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about this workshop at <a href="https://github.com/adntobias/Development-Praxisworkshop">ADN Distribution</a>.</p>
+    <p>Learn about this workshop at <a href="https://github.com/adnkai/Development-Praxisworkshop">ADN Distribution</a>.</p>
+    <h1>Azure Development - Praxisworkshop</h1>
+
 </div>
 
 @if(@User.Identity.IsAuthenticated) {
@@ -17,6 +21,23 @@
     <tr>
         <td>@User.Claims?.FirstOrDefault(x => x.Type.Equals("preferred_username", StringComparison.OrdinalIgnoreCase))?.Value</td>
     </tr>
-   
+    <tr>
+        <td>@User.Claims?.FirstOrDefault(x => x.Type.Equals("Role", StringComparison.OrdinalIgnoreCase))?.Value</td>
+    </tr>
+
+    @{
+        var roles = @User.Claims?.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Role))?.Value;
+        Html.DisplayName("Profile " + roles);
+    }
+
+    @foreach (var claim in User.Claims){
+        <tr>
+            <td>@claim.Type</td>
+            <td>@claim.Value</td>
+        </tr>
+    }
+
+
 </table>
+
 }

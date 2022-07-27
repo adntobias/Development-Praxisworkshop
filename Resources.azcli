@@ -1,9 +1,9 @@
-#Run this script in Azure CloudShell
+#Run this script in Azure CloudShell - Bash
 
 #Variables
 Suffix=$(head -n 10 /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1) #RandomString - To Be Replaced
 RGName="AzureDevWorkshop"$Suffix
-Location="germanywestcentral"
+Location="westus"
 WebAppPlanName="demoPlanDev"$Suffix
 WebAppName="wrkshpwebfrontend"$Suffix
 DataStorename="wrkshpdatastore"$Suffix
@@ -15,9 +15,9 @@ SecretName="StorageConnectionString"
 AppInsightsName="wrkshpmonitoring"$Suffix
 WorkspaceName="wrkshpmonitoringworspace"$Suffix
 #--------------------------------------------
-RegistryName="myacr"$Suffix
-ImageTag="frontend:v1"
-AKSName="myaks"$Suffix
+#RegistryName="myacr"$Suffix
+#ImageTag="frontend:v1"
+#AKSName="myaks"$Suffix
 
 #WebApp
 az group create --name $RGName --location $Location
@@ -100,6 +100,9 @@ az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentica
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientId=$ClientId
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__TenantId=$TenantId
 az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientSecret=$Secret
+az webapp config appsettings set -g $RGName -n $WebAppName --settings Authentication__ClientCapabilities=[ "cp1" ]
+az webapp config appsettings set -g $RGName -n $WebAppName --settings DownstreamApi__Scopes=user.read
+az webapp config appsettings set -g $RGName -n $WebAppName --settings DownstreamApi__BaseUrl=https://graph.microsoft.com/v1.0
 #az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__VaultUri=$KVUri
 #az webapp config appsettings set -g $RGName -n $WebAppName --settings KeyVault__StorageAccountCredentials=$KVSecretUri
 
@@ -111,8 +114,8 @@ az functionapp config appsettings set -n $FunctionName -g $RGName --settings "TA
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 #ACR
-az acr create -g $RGName -n $RegistryName --sku Basic
-az acr login -n $RegistryName
+#az acr create -g $RGName -n $RegistryName --sku Basic
+#az acr login -n $RegistryName
 #az acr update -n $RegistryName --admin-enabled true
 #az acr credential show -n $Registry --query "passwords[0].value"
 #$RegistryFull=$(az acr list -g $RGName --query "[].{acrLoginServer:loginServer}" --output tsv)
