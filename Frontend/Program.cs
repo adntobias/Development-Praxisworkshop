@@ -1,4 +1,8 @@
 
+using Development_Praxisworkshop.Pages;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Azure;
+
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 
@@ -13,13 +17,14 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftGraph(Configuration.GetSection("DownstreamApi"))
     .AddInMemoryTokenCaches();
 
-builder.Services.AddAuthorization(options => {
+builder.Services.AddAuthorization(options =>
+{
     options.AddPolicy("ClaimsTest", policy => policy.RequireClaim("Contacts.Read"));
     options.AddPolicy("MustHaveOneDrive", policy => policy.RequireClaim("Files.ReadWrite"));
     //options.AddPolicy("Roles", policy => policy.RequireClaim("Roles"));
 });
 
-        // Enable Authentication globally
+// Enable Authentication globally
 builder.Services.AddControllersWithViews(options =>
     {
         var policy = new AuthorizationPolicyBuilder()
@@ -46,13 +51,21 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 {
     options.Events.OnRemoteSignOut = async context =>
     {
-        await Task.Run(() => {
+        await Task.Run(() =>
+        {
             context.Response.Redirect("/");
         });
     };
 });
 
-
+builder.Services.AddHealthChecks()
+    .AddCheck<HealthCheck>("HealthCheck")
+    .AddAzureKeyVault(new Uri(Configuration.GetValue<string>("AzureKeyVault:Uri")), new DefaultAzureCredential(), options => 
+    {
+        options.AddSecret("StorageConnectionString");
+    })
+    .AddAzureBlobStorage()
+    .AddAzureApplicationInsights(Configuration.GetValue<string>("ApplicationInsights:InstrumentationKey"));
 
 var app = builder.Build();
 
@@ -73,6 +86,9 @@ app.UseAuthentication(); // Use Authentication
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapHealthChecks("/healthcheck")
+    .RequireAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
