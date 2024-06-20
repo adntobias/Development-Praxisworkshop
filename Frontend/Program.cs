@@ -60,7 +60,7 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 
 builder.Services.AddHealthChecks()
     .AddCheck<HealthCheck>("HealthCheck")
-    .AddAzureKeyVault(new Uri(Configuration.GetSection("AzureKeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
+    .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
     {
         options.AddSecret("StorageConnectionString");
     })
