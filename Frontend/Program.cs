@@ -87,8 +87,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-app.MapHealthChecks("/healthcheck")
-    .RequireAuthorization();
+app.MapHealthChecks("/healthcheck");
 
 app.UseEndpoints(endpoints =>
 {
