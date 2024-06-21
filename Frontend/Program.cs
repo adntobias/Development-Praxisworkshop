@@ -41,6 +41,7 @@ builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 
 builder.Services.AddSingleton<IDataSingleton, DataSingleton>();
+builder.Services.AddSingleton(sp => new BlobServiceClient(new Uri("https://wrkshpdatastore.blob.core.windows.net/"), new DefaultAzureCredential()));
 
 builder.Services.AddHttpContextAccessor();
 // Include Application Insights with config from appsettings.json
@@ -58,14 +59,14 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
     };
 });
 
-//builder.Services.AddHealthChecks()
-   /* .AddCheck<HealthCheck>("healthcheck")
+builder.Services.AddHealthChecks()
+   // .AddCheck<HealthCheck>("healthcheck")
      .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
     {
         options.AddSecret("StorageConnectionString");
     })
     .AddAzureBlobStorage()
-    .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")) ;*/
+    .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")); 
 
 var app = builder.Build();
 
@@ -87,14 +88,13 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-//app.MapHealthChecks("/healthcheck");
-
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
     endpoints.MapRazorPages();
+    endpoints.MapHealthChecks("/HealthCheck");
 });
 
 app.Run();
