@@ -19,6 +19,6 @@ public class HealthCheckPageModel : PageModel
     {
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 
-        throw new ArgumentNullException();
+        _logger.LogInformation("HealthCheckPageModel.OnGet executed.");
     }
 }
