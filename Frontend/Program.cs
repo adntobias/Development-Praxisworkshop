@@ -58,14 +58,14 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
     };
 });
 
-builder.Services.AddHealthChecks()
-    .AddCheck<HealthCheck>("healthcheck")
-/*     .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
+//builder.Services.AddHealthChecks()
+   /* .AddCheck<HealthCheck>("healthcheck")
+     .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
     {
         options.AddSecret("StorageConnectionString");
     })
     .AddAzureBlobStorage()
-    .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")) */;
+    .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")) ;*/
 
 var app = builder.Build();
 
@@ -87,7 +87,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-app.MapHealthChecks("/healthcheck");
+//app.MapHealthChecks("/healthcheck");
 
 app.UseEndpoints(endpoints =>
 {
