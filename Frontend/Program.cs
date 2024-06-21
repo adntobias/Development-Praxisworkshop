@@ -41,7 +41,6 @@ builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 
 builder.Services.AddSingleton<IDataSingleton, DataSingleton>();
-builder.Services.AddSingleton(sp => new BlobServiceClient(new Uri("https://wrkshpdatastore.blob.core.windows.net/"), new DefaultAzureCredential()));
 
 builder.Services.AddHttpContextAccessor();
 // Include Application Insights with config from appsettings.json
@@ -60,12 +59,11 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 });
 
 builder.Services.AddHealthChecks()
-   // .AddCheck<HealthCheck>("healthcheck")
      .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
     {
         options.AddSecret("StorageConnectionString");
     })
-    .AddAzureBlobStorage()
+    //.AddAzureBlobStorage()
     .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")); 
 
 var app = builder.Build();
