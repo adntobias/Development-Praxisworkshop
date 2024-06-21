@@ -59,11 +59,10 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 });
 
 builder.Services.AddHealthChecks()
-     .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new ManagedIdentityCredential(), options => 
+     .AddAzureKeyVault(new Uri(Configuration.GetSection("KeyVault").GetValue<string>("VaultUri")), new DefaultAzureCredential(), options => 
     {
         options.AddSecret("StorageConnectionString");
     })
-    //.AddAzureBlobStorage()
     .AddAzureApplicationInsights(Configuration.GetSection("ApplicationInsights").GetValue<string>("InstrumentationKey")); 
 
 var app = builder.Build();
