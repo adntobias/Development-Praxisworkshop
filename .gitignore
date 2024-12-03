@@ -12,6 +12,8 @@
 *.code-workspace
 
 appsettings.json
+*.sln
+.vscode/
 
 # Local History for Visual Studio Code
 .history/
