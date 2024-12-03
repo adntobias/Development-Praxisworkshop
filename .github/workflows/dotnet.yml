@@ -5,10 +5,10 @@ on: [push]
 env:
   AZURE_WEBAPP_NAME: wrkshpwebfrontend
   AZURE_WEBAPP_PACKAGE_PATH: '.'
-  DOTNET_VERSION: '6.0.x'
+  DOTNET_VERSION: '8.0.x'
   AZURE_FUNCTION_NAME: wrkshptodofunction
   AZURE_FUNCTION_PACKAGE_PATH: '.'
-  DOTNET_VERSION_FUNCTION: '6.0.x'
+  DOTNET_VERSION_FUNCTION: '8.0.x'
 
 jobs:
   frontend:
@@ -126,7 +126,11 @@ jobs:
       - name: Setup .NET Core 6.0
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
+      - name: Setup .NET Core 8.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
       
       # Run dotnet build and publish Function
       - name: dotnet build and publish Function
