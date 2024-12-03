@@ -10,7 +10,7 @@
 
 <h2>OneDrive files</h2>
 
-@foreach (DriveItem file in @Model._files)
+@foreach (Microsoft.Graph.Models.DriveItem file in @Model._files.Value)
 {
     <div class="responsive">
         <div class="gallery">

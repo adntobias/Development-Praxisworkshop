@@ -1,3 +1,6 @@
+using Microsoft.Graph.Models;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+
 namespace Development_Praxisworkshop.Pages;
 
 //[Authorize(Policy="MustHaveOneDrive")] // need onedrive permissions
@@ -9,7 +12,7 @@ public class OneDriveFilesModel : PageModel
     readonly ITokenAcquisition _tokenAcquisition;
     private string _accessToken;
     private readonly GraphServiceClient _graphServiceClient;
-    public IDriveItemChildrenCollectionPage _files;
+    public DriveItemCollectionResponse _files;
     private readonly MicrosoftIdentityConsentAndConditionalAccessHandler _consentHandler;
 
     private string[] _graphScopes;
@@ -28,15 +31,21 @@ public class OneDriveFilesModel : PageModel
         _graphScopes = new[] {"files.readwrite", "Sites.Read.All"}; // required for Onedrive Items/Folders
     }
 
-    public void OnGet()
+    public async void OnGet()
     {
         // Scopes, welche JETZT benötigt werden.
         //string[] scopes = new string[]{"Contacts.Read","Family.Read"}; // Inkrementelle Anforderung automatisch durch bekanntgabe gaaaanz oben
         string[] scopes = new string[]{"files.readwrite", "Sites.Read.All"}; // Inkrementelle Anforderung automatisch durch bekanntgabe gaaaanz oben
         _accessToken = _tokenAcquisition.GetAccessTokenForUserAsync(scopes).Result;
         Console.WriteLine(_accessToken);
-        _files = _graphServiceClient.Me.Drive.Root.Children.Request().GetAsync().Result;
 
+		var rootDrive = await _graphServiceClient.Users["admin@devtobi.onmicrosoft.com"].Drive.GetAsync();
+
+		var drive = await _graphServiceClient.Me.Drive.GetAsync();
+        Console.WriteLine(drive.Id);
+
+		_files = await _graphServiceClient.Drives[drive.Id].Items["root"].Children.GetAsync();//  .Drives[drive.Id].Item["root"].Children.GetAsync().Result;
+		Console.WriteLine($"filesCount {_files.OdataCount}");
     }
 
     

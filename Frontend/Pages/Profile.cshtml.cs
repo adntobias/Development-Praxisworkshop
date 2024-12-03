@@ -23,11 +23,11 @@ public class ProfileModel : PageModel
 
     public void OnGet()
     {
-        User currentUser = _graphServiceClient.Me.Request().GetAsync().GetAwaiter().GetResult();
+        var currentUser = _graphServiceClient.Me.GetAsync().GetAwaiter().GetResult();
 
         try
         {
-            currentUser = _graphServiceClient.Me.Request().GetAsync().GetAwaiter().GetResult();
+            currentUser = _graphServiceClient.Me.GetAsync().GetAwaiter().GetResult();
         }
         // Catch CAE exception from Graph SDK
         catch (ServiceException svcex) when (svcex.Message.Contains("Continuous access evaluation resulted in claims challenge"))
@@ -47,7 +47,7 @@ public class ProfileModel : PageModel
         try
         {
             // Get user photo
-            using (var photoStream = _graphServiceClient.Me.Photo.Content.Request().GetAsync().Result)
+            using (var photoStream = _graphServiceClient.Me.Photo.Content.GetAsync().Result)
             {
                 byte[] photoByte = ((MemoryStream)photoStream).ToArray();
                 ViewData["Photo"] = Convert.ToBase64String(photoByte);

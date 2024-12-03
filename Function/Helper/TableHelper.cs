@@ -1,4 +1,7 @@
 
+
+using Azure;
+
 namespace Project;
 class TableSettings
 {
@@ -7,7 +10,7 @@ class TableSettings
   public string StorageConnectionString { get; }
   public string TableName { get; }
 
-  private CloudTable _table { get; set; }
+  private TableClient _table { get; set; }
 
   public TableSettings(string tableName)
   {
@@ -27,16 +30,10 @@ class TableSettings
   private async Task GetTableAsync()
   {
     //Account
-    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(this.StorageConnectionString);
-
-    //Client
-    CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-    //Table
-    CloudTable table = tableClient.GetTableReference(this.TableName);
-    await table.CreateIfNotExistsAsync();
-
-    this._table = table;
+    TableServiceClient storageAccount = new TableServiceClient(this.StorageConnectionString);
+    TableClient tableClient = new TableClient(this.StorageConnectionString, this.TableName);
+    
+    this._table = tableClient;
   }
 
   public async Task<Todo> InsertItem(Todo _todoItem)
@@ -51,12 +48,12 @@ class TableSettings
       await GetTableAsync();
     }
 
-    TableResult result;
-    TableOperation operation = TableOperation.InsertOrReplace(_todoItem);
+    Response result;
+    //TableOperation operation = TableOperation.InsertOrReplace(_todoItem);
 
     try
     {
-      result = await _table.ExecuteAsync(operation);
+      result = await _table.UpsertEntityAsync(_todoItem);
     }
     catch (System.Exception e)
     {
@@ -64,7 +61,7 @@ class TableSettings
       throw;
     }
 
-    Todo newTodo = (Todo)result.Result;
+    Todo newTodo = JsonConvert.DeserializeObject<Todo>(result.Content.ToString());
 
     return newTodo;
   }
@@ -81,12 +78,12 @@ class TableSettings
       await GetTableAsync();
     }
 
-    TableResult result;
-    TableOperation operation = TableOperation.Delete(_todoItem);
+    Response result;
+    //TableOperation operation = TableOperation.Delete(_todoItem);
 
     try
     {
-      result = await _table.ExecuteAsync(operation);
+      result = await _table.DeleteEntityAsync(_todoItem);
     }
     catch (System.Exception e)
     {
@@ -94,7 +91,7 @@ class TableSettings
       throw;
     }
 
-    Todo deletedTodo = (Todo)result.Result;
+    Todo deletedTodo = JsonConvert.DeserializeObject<Todo>(result.Content.ToString());
 
     return deletedTodo;
   }
@@ -108,11 +105,11 @@ class TableSettings
       await GetTableAsync();
     }
 
-    TableQuery<Todo> query = new TableQuery<Todo>();
+    //Pageable<Todo> query = new TableQuery<Todo>();
 
     try
     {
-      foreach (Todo t in _table.ExecuteQuery(query))
+      await foreach (Todo t in _table.QueryAsync<Todo>())
       {
         todos.Add(t);
       }
@@ -136,14 +133,14 @@ class TableSettings
       await GetTableAsync();
     }
 
-    TableOperation operation = TableOperation.Retrieve<Todo>(_pKey, _id);
+    //TableOperation operation = TableOperation.Retrieve<Todo>(_pKey, _id);
 
-    TableResult result;
+    //Response result;
 
     try
     {
-      result = await _table.ExecuteAsync(operation);
-      todo = (Todo)result.Result;
+      todo = await _table.GetEntityAsync<Todo>(_pKey, _id);
+      //todo = (Todo)result.Result;
     }
     catch (System.Exception e)
     {
