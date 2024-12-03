@@ -12,7 +12,7 @@ public class OneDriveFilesModel : PageModel
     readonly ITokenAcquisition _tokenAcquisition;
     private string _accessToken;
     private readonly GraphServiceClient _graphServiceClient;
-    public DriveItemCollectionResponse _files;
+    public List<DriveItem> _files;
     private readonly MicrosoftIdentityConsentAndConditionalAccessHandler _consentHandler;
 
     private string[] _graphScopes;
@@ -31,22 +31,25 @@ public class OneDriveFilesModel : PageModel
         _graphScopes = new[] {"files.readwrite", "Sites.Read.All"}; // required for Onedrive Items/Folders
     }
 
-    public async void OnGet()
+    public async Task OnGet()
     {
         // Scopes, welche JETZT benötigt werden.
         //string[] scopes = new string[]{"Contacts.Read","Family.Read"}; // Inkrementelle Anforderung automatisch durch bekanntgabe gaaaanz oben
-        string[] scopes = new string[]{"files.readwrite", "Sites.Read.All"}; // Inkrementelle Anforderung automatisch durch bekanntgabe gaaaanz oben
-        _accessToken = _tokenAcquisition.GetAccessTokenForUserAsync(scopes).Result;
+        string[] scopes = new string[] { "files.readwrite", "Sites.Read.All" }; // Inkrementelle Anforderung automatisch durch bekanntgabe gaaaanz oben
+        _accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(scopes);
         Console.WriteLine(_accessToken);
 
-		var rootDrive = await _graphServiceClient.Users["admin@devtobi.onmicrosoft.com"].Drive.GetAsync();
+        //var rootDrive = await _graphServiceClient.Users["admin@devtobi.onmicrosoft.com"].Drive.GetAsync();
 
-		var drive = await _graphServiceClient.Me.Drive.GetAsync();
+        var drive = await _graphServiceClient.Me.Drive.GetAsync();
         Console.WriteLine(drive.Id);
 
-		_files = await _graphServiceClient.Drives[drive.Id].Items["root"].Children.GetAsync();//  .Drives[drive.Id].Item["root"].Children.GetAsync().Result;
-		Console.WriteLine($"filesCount {_files.OdataCount}");
-    }
+        DriveItem itemRoot = await _graphServiceClient.Drives[drive.Id].Root.GetAsync((conf) =>
+        {
+            conf.QueryParameters.Expand = new string[] { "children" };
+        });
 
+        _files = itemRoot.Children;
     
+    }
 }

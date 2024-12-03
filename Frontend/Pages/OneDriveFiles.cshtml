@@ -2,20 +2,23 @@
 @model OneDriveFilesModel
 
 @{
-    ViewData["Title"] = "OneDrive"; 
+	ViewData["Title"] = "OneDrive";
 }
 <link rel="stylesheet" href="~/css/gallery.css" />
 <h1>@ViewData["Title"]</h1>
 
 
 <h2>OneDrive files</h2>
-
-@foreach (Microsoft.Graph.Models.DriveItem file in @Model._files.Value)
+@if (Model._files != null)
 {
-    <div class="responsive">
-        <div class="gallery">
-            <div class="desc">@file.Name</div>
-        </div>
-    </div>
+	@foreach (Microsoft.Graph.Models.DriveItem file in @Model._files)
+	{
+		<div class="responsive">
+			<div class="gallery">
+				<div class="desc">@file.Name</div>
+			</div>
+		</div>
+	}
 }
+
 <div class="clearfix"></div>
